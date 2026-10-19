@@ -1,0 +1,20 @@
+# Data and models
+data/
+models/
+*.pkl
+*.csv
+*.parquet
+
+# Python environments and cache
+venv/
+__pycache__/
+.ipynb_checkpoints/
+.pytest_cache/
+
+# IDEs and local AI tool files (per course rules)
+.vscode/
+.cursor/
+.cursorrules
+AGENTS.md
+CLAUDE.md
+.env
