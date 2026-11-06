@@ -93,3 +93,19 @@ feat = build_feature_table(df)  # lags + day_of_week + next-day target
 - Rolling means, sleep debt, and strain ratio are not added yet (Phase 2 ablation).
 
 Leakage smoke tests: `pytest tests/test_leakage.py` (uses a tiny fake calendar, no zip needed).
+
+### Split + naive baseline
+
+```python
+from src.split import time_based_split, assert_no_future_in_train
+from src.models import naive_predict
+from src.evaluate import regression_metrics, mae_improvement
+
+train, test = time_based_split(feat, test_fraction=0.2)
+assert_no_future_in_train(train, test)
+
+naive_pred = naive_predict(test)  # tomorrow ≈ today's readiness
+naive_metrics = regression_metrics(test["target_readiness"], naive_pred)
+```
+
+No random splits. Linear / tree models come next and must beat this baseline.

@@ -20,3 +20,11 @@
 - **Problems / what didn't work:** Current `venv` is Python 3.14; pinned `pandas==2.2.0` will not install cleanly on 3.14 (needs build from source). Journal from 2026-10-20 said 3.11 — we should recreate the venv on 3.11 before training.
 - **Considered but rejected:** Rolling 3/7-day means and sleep debt in this same change — Phase 2; adding them now would mix feature groups and break the ablation plan. Also rejected putting the binary label in a separate “independent” story: it is derived from the score and the report must say so.
 - **Next:** Recreate Python 3.11 venv + download PMData if missing → time-based split (`split.py`) → naive baseline + linear regression MAE.
+
+## 2026-11-06 — Team (session 2)
+- **Did:** Added `src/split.py` (per-user time split: earlier → train, later → test), `src/models.py` naive baseline (`tomorrow ≈ today`), and `src/evaluate.py` (MAE/RMSE + improvement vs naive). Tests in `tests/test_split.py` and `tests/test_naive_baseline.py`.
+- **Why:** Need a leakage-safe split and a baseline number before any real model; a model only counts if it beats “tomorrow = today”.
+- **Result (numbers):** Still no PMData on this machine — only unit tests. Split keeps max(train date) < min(test date) per user.
+- **Problems / what didn't work:** Nothing broken in the toy tests. Still blocked on real MAE until PMData is downloaded.
+- **Considered but rejected:** Random `train_test_split` (leaks future). Held-out-users split — save for Phase 2 comparison. Linear regression — next commit once split + naive are locked.
+- **Next:** Linear / logistic regression in a Pipeline (scale on train only) and report MAE vs naive on real data.
