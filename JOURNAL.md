@@ -13,7 +13,8 @@
 - **Decision:** Target is now self-reported readiness (1–10), not a 0–100 score.
 - **Next:** Download PMData, inspect files.
 
-## 2026-11-06 — Team
+## 2026-11-06 — paryag
+
 - **Did:** Implemented `src/features.py`: next-day readiness target (`groupby(user_id).shift(-1)`), derived binary label (`ready_high_intensity` = target ≥ 7), lag-1 features for wellness/Fitbit columns, and day-of-week. Added `tests/test_leakage.py` (toy 2-user calendar) so we catch cross-user shift bugs without needing the 1.4 GB zip. Wired a short check into `01_eda.ipynb`.
 - **Why:** Phase 1 needs the modelling table before splits/baselines. Leakage rules 1–2 are the highest-risk part; better to lock them with tests early.
 - **Result (numbers):** Not measured on real PMData this session (local `data/raw/pmdata` not present). Toy tests cover target alignment and “lag must not cross users”.
