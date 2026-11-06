@@ -78,3 +78,18 @@ Overall distribution of the 1,747 raw reports:
   with that morning's wellness report.
 - Days with two wellness reports keep the last one (23 duplicates).
 - Days with no logged training session get training load 0.
+
+### Features so far (`src/features.py`)
+
+```python
+from src.features import build_feature_table
+feat = build_feature_table(df)  # lags + day_of_week + next-day target
+```
+
+- **Target:** `target_readiness` = tomorrow's readiness (`groupby(user_id).shift(-1)`); last day per user dropped.
+- **Binary label:** `ready_high_intensity` = (`target_readiness` ≥ 7). Derived from the score — not an independent outcome.
+- **Lags:** yesterday's wellness / load / resting HR / steps / sleep / active minutes (per user).
+- **Calendar:** `day_of_week`.
+- Rolling means, sleep debt, and strain ratio are not added yet (Phase 2 ablation).
+
+Leakage smoke tests: `pytest tests/test_leakage.py` (uses a tiny fake calendar, no zip needed).
