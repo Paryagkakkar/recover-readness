@@ -93,3 +93,37 @@ feat = build_feature_table(df)  # lags + day_of_week + next-day target
 - Rolling means, sleep debt, and strain ratio are not added yet (Phase 2 ablation).
 
 Leakage smoke tests: `pytest tests/test_leakage.py` (uses a tiny fake calendar, no zip needed).
+
+### Split + naive baseline
+
+```python
+from src.split import time_based_split, assert_no_future_in_train
+from src.models import naive_predict
+from src.evaluate import regression_metrics, mae_improvement
+
+train, test = time_based_split(feat, test_fraction=0.2)
+assert_no_future_in_train(train, test)
+
+naive_pred = naive_predict(test)  # tomorrow ≈ today's readiness
+naive_metrics = regression_metrics(test["target_readiness"], naive_pred)
+```
+
+No random splits. Linear / tree models come next and must beat this baseline.
+
+### First results (Phase 1, `python -m src.run_baseline`)
+
+Per-user time split (earlier 80% of each user's days train, later 20% test). Both models are
+scored on the same 254 test rows where today's readiness is known (so the naive baseline exists).
+
+| Model | MAE | RMSE |
+|---|---|---|
+| Naive (tomorrow = today) | 1.059 | 1.569 |
+| Linear regression | 1.050 | 1.372 |
+
+| Label: readiness >= 7 (19% of test days) | F1 | ROC-AUC |
+|---|---|---|
+| Naive (today >= 7) | 0.612 | n/a |
+| Logistic regression (balanced weights, threshold 0.5) | 0.548 | 0.868 |
+
+Reading: linear regression is only slightly better than the naive baseline on MAE, so next-day
+readiness is mostly "today's readiness plus noise". These are first numbers on one split, not tuned.
