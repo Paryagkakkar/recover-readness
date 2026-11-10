@@ -17,4 +17,5 @@ __pycache__/
 .cursorrules
 AGENTS.md
 CLAUDE.md
-.env.venv/
+.env
+.venv/
