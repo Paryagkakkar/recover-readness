@@ -2,3 +2,4 @@ basic setup done #paryag
 PMData selection and environment setup #Dev
 PMData loader (gap-free daily table) + README dataset notes #Dev/Paryag
 feat: next-day target + lag features + leakage tests #Team
+feat: time-based split + naive baseline metrics #Team
