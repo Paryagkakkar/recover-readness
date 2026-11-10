@@ -109,3 +109,21 @@ naive_metrics = regression_metrics(test["target_readiness"], naive_pred)
 ```
 
 No random splits. Linear / tree models come next and must beat this baseline.
+
+### First results (Phase 1, `python -m src.run_baseline`)
+
+Per-user time split (earlier 80% of each user's days train, later 20% test). Both models are
+scored on the same 254 test rows where today's readiness is known (so the naive baseline exists).
+
+| Model | MAE | RMSE |
+|---|---|---|
+| Naive (tomorrow = today) | 1.059 | 1.569 |
+| Linear regression | 1.050 | 1.372 |
+
+| Label: readiness >= 7 (19% of test days) | F1 | ROC-AUC |
+|---|---|---|
+| Naive (today >= 7) | 0.612 | n/a |
+| Logistic regression (balanced weights, threshold 0.5) | 0.548 | 0.868 |
+
+Reading: linear regression is only slightly better than the naive baseline on MAE, so next-day
+readiness is mostly "today's readiness plus noise". These are first numbers on one split, not tuned.

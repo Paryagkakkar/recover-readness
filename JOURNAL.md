@@ -29,3 +29,11 @@
 - **Problems / what didn't work:** Nothing broken in the toy tests. Still blocked on real MAE until PMData is downloaded.
 - **Considered but rejected:** Random `train_test_split` (leaks future). Held-out-users split — save for Phase 2 comparison. Linear regression — next commit once split + naive are locked.
 - **Next:** Linear / logistic regression in a Pipeline (scale on train only) and report MAE vs naive on real data.
+
+## 2026-11-10 — Dev (draft written by AI assistant — edit in your own words)
+- **Did:** Merged the time-split + naive baseline branch. Recreated the venv on Python 3.11, downloaded PMData and ran the first real results. Added linear and logistic regression pipelines (median imputer + missing flags + scaler, fitted on train only), classification metrics, `src/run_baseline.py` and `tests/test_models.py`.
+- **Why:** A model only counts if it beats "tomorrow = today", and we had no real number yet.
+- **Result:** Per-user time split, 1,368 train / 340 test rows; "ready" share 21% train / 19% test. On the 254 test rows where today's readiness is known: naive MAE 1.059, RMSE 1.569; linear MAE 1.050, RMSE 1.372 (MAE only 0.9% better, RMSE 12.5% better). Linear on all 340 test rows: MAE 1.106. Classification (readiness >= 7): naive F1 0.612; logistic F1 0.548, ROC-AUC 0.868.
+- **Problems / what didn't work:** Linear regression barely beats the naive baseline on MAE. Logistic regression with balanced class weights over-predicts "ready" (46 false positives) and has a lower F1 than naive, though its ranking is good (AUC 0.868). One pandas FutureWarning from `pd.concat` in `load_daily_table` (empty frames), not yet looked at. The naive baseline cannot score the 86 test rows where today's report is missing.
+- **Considered but rejected:** Comparing models on different rows (would flatter the model); random split; adding rolling features before knowing if lags help.
+- **Next:** Tree model (LightGBM / random forest) on the same split; tune the classification threshold instead of 0.5 (not on the test set); look at per-user errors; rolling features as a separate ablation.
