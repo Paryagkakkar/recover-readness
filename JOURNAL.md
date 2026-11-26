@@ -12,3 +12,9 @@
 - **Issues:** Streamlit needed pyarrow pinned to 17.0.0; LightGBM on Mac needs `brew install libomp`; .gitignore missed .venv/.
 - **Decision:** Target is now self-reported readiness (1–10), not a 0–100 score.
 - **Next:** Download PMData, inspect files.
+
+## 2026-11-27 — Modeling and Streamlit demo
+- **Did:** Compared the simple daily guess, linear and logistic models, and a random forest on later days from the same 16 participants. Replaced the dashboard's sample predictions with the simple estimate and a compact linear model that trains on local PMData.
+- **Why:** Keep the demo easy to use and tie its inputs to the measurements in the project dataset.
+- **Result:** The simple guess averaged a 1.042-point miss on 265 comparable test days. The demo showed both estimates with PMData and the simple estimate alone without it.
+- **Limit:** The demo uses five inputs. The benchmark includes additional inputs, and its results apply to later days from participants already in the dataset.
