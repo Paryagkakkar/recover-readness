@@ -117,3 +117,17 @@ python -m src.run_baseline
 
 The comparison prints the summary, counts of correct and incorrect ready-day
 decisions, and score error by participant.
+
+## Try the demo
+
+From the repository root, run:
+
+```bash
+python -m streamlit run app/streamlit_app.py
+```
+
+Enter today's readiness, last night's sleep, resting heart rate, and steps.
+The simple estimate repeats today's score. If PMData is available locally,
+the app also shows an estimate from a linear model trained on the five
+form inputs. The benchmark above uses additional inputs, including earlier
+readings, so its results describe a different setup.
