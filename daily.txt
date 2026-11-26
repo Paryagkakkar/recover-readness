@@ -1,2 +1,4 @@
 basic setup done #paryag
 PMData selection and environment setup #Dev
+
+Recorded the model comparison and connected the Streamlit demo to local PMData.
