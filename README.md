@@ -78,3 +78,42 @@ Overall distribution of the 1,747 raw reports:
   with that morning's wellness report.
 - Days with two wellness reports keep the last one (23 duplicates).
 - Days with no logged training session get training load 0.
+
+## How well can we predict tomorrow?
+
+For each person, we trained on earlier days and saved roughly the last fifth
+of their labeled days for testing. Training used 1,341 days. Of the 351 test
+days, 265 had both today's and tomorrow's reported scores. Every method in
+the table was compared on those same 265 days. We set aside training examples
+whose next-day scores would reach into that person's test period.
+
+| Method | Average miss ↓ | Error with bigger misses weighted more ↓ | Ready-day F1 ↑ | Ready-day ranking (ROC-AUC) ↑ |
+|---|---:|---:|---:|---:|
+| Simple guess (tomorrow = today) | **1.042** | 1.544 | **0.622** | 0.872 |
+| Linear score model + logistic classifier | 1.046 | **1.364** | 0.494 | 0.862 |
+| Random forest | 1.062 | 1.365 | 0.387 | **0.902** |
+
+The simple guess was closest on average, missing by about one point on the
+0–10 scale. The trained models reduced the penalty from larger misses.
+The forest ranked ready days best, but at its default cutoff it identified
+only 12 of 46 ready days. The simple guess identified 28. A “ready” day means
+a self-reported score of 7 or higher. These days made up 21.3% of training days
+and 17.4% of the compared test days.
+
+Results varied by person. For example, the average miss for participant p06
+fell from 2.14 points with the simple guess to 1.56 with the linear model.
+For p12 it rose from 0.80 to 1.93. These results describe one test split on
+the same 16 participants.
+
+### Run the comparison
+
+With the pinned dependencies installed and PMData extracted as described
+above, run these commands from the repository root:
+
+```bash
+python -m pytest -q
+python -m src.run_baseline
+```
+
+The comparison prints the summary, counts of correct and incorrect ready-day
+decisions, and score error by participant.
