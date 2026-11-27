@@ -24,3 +24,4 @@
 - **Why:** Give the course demo a clear layout and keep the same model behind both interfaces.
 - **Result:** The browser can show both estimates with local PMData. The simple estimate is still available without it.
 - **Setup:** Added Flask 3.1.3 and included the Tabler 1.7.5 stylesheet and MIT license.
+- **Verified:** All 13 tests passed. The browser example returned 7.0/10 from the model and 8.0/10 from the simple estimate. The form rejected an out-of-range score, the layout fit at desktop and phone widths, and Streamlit still returned both estimates.

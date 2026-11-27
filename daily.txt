@@ -4,3 +4,4 @@ PMData selection and environment setup #Dev
 Recorded the model comparison and connected the Streamlit demo to local PMData.
 
 2026-11-27 — Added the Tabler dashboard and connected it to the shared readiness model.
+2026-11-27 — Verified the dashboard on desktop and phone widths. All 13 tests passed.
