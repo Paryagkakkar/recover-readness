@@ -1,26 +1,13 @@
 """A small demo of tomorrow's self-reported readiness."""
 
-from pathlib import Path
-
-import pandas as pd
 import streamlit as st
 
-from src.data import load_daily_table
-from src.features import build_feature_table
-from src.models import model_pairs
-from src.split import time_based_split
+from src.prediction import DATA_DIR, DEMO_FEATURES, estimate_readiness, train_demo_model
 
 
-DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "raw" / "pmdata"
-DEMO_FEATURES = ["readiness", "sleep_duration_h", "sleep_quality", "resting_hr", "steps"]
-
-
-@st.cache_resource(show_spinner="Training the demo model on local PMData…")
-def train_demo_model(data_dir):
-    examples = build_feature_table(load_daily_table(data_dir))
-    train, _ = time_based_split(examples)
-    model, _ = model_pairs()["Linear / logistic"]
-    return model.fit(train[DEMO_FEATURES], train["target_readiness"])
+cached_demo_model = st.cache_resource(
+    train_demo_model, show_spinner="Training the demo model on local PMData…"
+)
 
 
 st.set_page_config(page_title="Recovery Readiness", layout="centered")
@@ -35,24 +22,26 @@ with st.form("readiness_inputs"):
         sleep_quality = st.slider("Sleep quality", 1, 5, 3, help="1 is poor and 5 is excellent.")
     with activity:
         resting_hr = st.number_input("Resting heart rate (bpm)", 20, 220, 60)
-        steps = st.number_input("Steps today", min_value=0, value=8000, step=100)
+        steps = st.number_input("Steps today", min_value=0, max_value=100_000, value=8000, step=100)
     submitted = st.form_submit_button("Estimate readiness", type="primary")
 
 if submitted:
     try:
-        model = train_demo_model(DATA_DIR)
+        model = cached_demo_model(DATA_DIR)
     except FileNotFoundError:
-        st.metric("Simple estimate", f"{readiness:.1f} / 10")
+        model = None
+
+    readings = dict(zip(DEMO_FEATURES, [readiness, sleep_hours, sleep_quality, resting_hr, steps]))
+    estimates = estimate_readiness(readings, model)
+    score = estimates["model_estimate"]
+
+    if score is None:
+        st.metric("Simple estimate", f"{estimates['simple_estimate']:.1f} / 10")
         st.caption("The simple estimate assumes tomorrow will feel like today.")
         st.info("To see the model estimate, add PMData locally using the README instructions.")
     else:
-        readings = pd.DataFrame(
-            [[readiness, sleep_hours, sleep_quality, resting_hr, steps]],
-            columns=DEMO_FEATURES,
-        )
-        score = model.predict(readings).clip(0, 10)[0]
         simple, fitted = st.columns(2)
-        simple.metric("Simple estimate", f"{readiness:.1f} / 10")
+        simple.metric("Simple estimate", f"{estimates['simple_estimate']:.1f} / 10")
         simple.caption("Tomorrow will feel like today.")
         fitted.metric("Model estimate", f"{score:.1f} / 10")
         fitted.caption("A linear model trained on the five inputs shown above.")

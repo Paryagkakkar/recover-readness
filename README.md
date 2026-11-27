@@ -131,3 +131,20 @@ The simple estimate repeats today's score. If PMData is available locally,
 the app also shows an estimate from a linear model trained on the five
 form inputs. The benchmark above uses additional inputs, including earlier
 readings, so its results describe a different setup.
+
+## Open the Tabler dashboard
+
+Install the pinned dependencies from `requirements.txt`, then run this from
+the repository root:
+
+```bash
+python -m flask --app app.dashboard run --port 8050
+```
+
+Open <http://127.0.0.1:8050>. Enter the five readings or select **Load example**,
+then select **Estimate readiness**. The simple estimate repeats today's score.
+When local PMData is present, the server trains the five-input model at startup
+and reuses it for each prediction. Restart after adding the dataset.
+
+The dashboard uses the MIT-licensed Tabler 1.7.5 stylesheet. Its license notice
+is in `app/static/TABLER-LICENSE.txt`.

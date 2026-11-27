@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recovery Readiness</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='tabler.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+  <script src="{{ url_for('static', filename='dashboard.js') }}" defer></script>
+</head>
+<body>
+  <a class="visually-hidden-focusable skip-link" href="#readings">Skip to readings</a>
+  <header class="site-header">
+    <div class="container-xl site-header-inner">
+      <a class="wordmark" href="{{ url_for('index') }}">Recovery Readiness</a>
+      <a class="header-link" href="#benchmark">Benchmark results</a>
+    </div>
+  </header>
+
+  <main class="container-xl dashboard">
+    <div class="page-intro">
+      <h1>Tomorrow’s readiness</h1>
+      <p>Use today’s readings to estimate how ready you’ll feel tomorrow.</p>
+    </div>
+
+    <div class="row g-4 align-items-start dashboard-grid">
+      <section class="col-lg-6" aria-labelledby="readings-heading">
+        <div class="card readings-card">
+          <div class="card-header">
+            <h2 class="card-title" id="readings-heading">Today’s readings</h2>
+            <button class="btn btn-outline-secondary btn-sm ms-auto" type="button" id="load-example">Load example</button>
+          </div>
+          <form id="readings" class="card-body" method="post" action="{{ url_for('predict') }}">
+            <noscript><p class="form-error">Enable JavaScript to estimate readiness.</p></noscript>
+            <div class="readiness-field">
+              <label class="form-label" for="readiness">How ready do you feel today?</label>
+              <div class="input-group">
+                <input class="form-control" id="readiness" name="readiness" type="number" min="0" max="10" step="1" required aria-describedby="readiness-help">
+                <span class="input-group-text">/ 10</span>
+              </div>
+              <div class="form-hint" id="readiness-help">0 means completely unready. 10 means fully ready.</div>
+            </div>
+            <div class="row g-3 other-readings">
+              <div class="col-sm-6">
+                <label class="form-label" for="sleep_duration_h">Sleep last night</label>
+                <div class="input-group">
+                  <input class="form-control" id="sleep_duration_h" name="sleep_duration_h" type="number" min="0" max="24" step="any" required>
+                  <span class="input-group-text">hours</span>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <label class="form-label" for="sleep_quality">Sleep quality</label>
+                <select class="form-select" id="sleep_quality" name="sleep_quality" required>
+                  <option value="">Select quality</option>
+                  <option value="1">1 · Very poor</option>
+                  <option value="2">2 · Poor</option>
+                  <option value="3">3 · Fair</option>
+                  <option value="4">4 · Good</option>
+                  <option value="5">5 · Excellent</option>
+                </select>
+              </div>
+              <div class="col-sm-6">
+                <label class="form-label" for="resting_hr">Resting heart rate</label>
+                <div class="input-group">
+                  <input class="form-control" id="resting_hr" name="resting_hr" type="number" min="20" max="220" step="1" required>
+                  <span class="input-group-text">bpm</span>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <label class="form-label" for="steps">Steps today</label>
+                <input class="form-control" id="steps" name="steps" type="number" min="0" max="100000" step="1" required>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Estimate readiness</button>
+              <span class="form-hint" id="input-note" role="status"></span>
+            </div>
+            <p class="form-error" id="form-error" role="alert" hidden></p>
+          </form>
+        </div>
+      </section>
+
+      <section class="col-lg-6" aria-labelledby="result-heading">
+        <div class="card result-card">
+          <div class="card-header">
+            <h2 class="card-title" id="result-heading">Tomorrow’s estimate</h2>
+          </div>
+          <div class="card-body" id="result" aria-live="polite">
+            <div class="score-pair">
+              <div>
+                <p class="score-label">Model estimate</p>
+                <p class="score-value model-score"><span id="model-score">—</span><span class="score-unit"> / 10</span></p>
+                <p class="score-help">Linear model using the five readings.</p>
+              </div>
+              <div>
+                <p class="score-label">Simple estimate</p>
+                <p class="score-value"><span id="simple-score">—</span><span class="score-unit"> / 10</span></p>
+                <p class="score-help">Tomorrow feels like today.</p>
+              </div>
+            </div>
+            <div class="score-scale" aria-hidden="true">
+              <div class="scale-line">
+                <span class="scale-marker simple-marker" id="simple-marker" hidden></span>
+                <span class="scale-marker model-marker" id="model-marker" hidden></span>
+              </div>
+              <div class="scale-ticks"><span>0</span><span>2</span><span>4</span><span>6</span><span>8</span><span>10</span></div>
+            </div>
+            <p class="result-note mb-0" id="result-note">{% if model_available %}Enter your readings or load an example to see both estimates.{% else %}The simple estimate is available. Add PMData locally to enable the model estimate.{% endif %}</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="card benchmark-card" id="benchmark" aria-labelledby="benchmark-heading">
+      <div class="card-body">
+        <div class="benchmark-intro">
+          <h2 id="benchmark-heading">How well did it work?</h2>
+          <p>The simple guess was closest on average. Linear regression reduced the impact of bigger misses.</p>
+        </div>
+        <table class="table table-vcenter mb-2">
+          <caption class="visually-hidden">Benchmark results on the same 265 test days</caption>
+          <thead><tr><th scope="col">Method</th><th scope="col" class="text-end">Average miss</th><th scope="col" class="text-end">Error with bigger misses weighted more</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Tomorrow = today</th><td class="text-end"><strong>1.042</strong></td><td class="text-end">1.544</td></tr>
+            <tr><th scope="row">Linear regression</th><td class="text-end">1.046</td><td class="text-end"><strong>1.364</strong></td></tr>
+            <tr><th scope="row">Random forest</th><td class="text-end">1.062</td><td class="text-end">1.365</td></tr>
+          </tbody>
+        </table>
+        <p class="benchmark-note mb-0">Errors are in points on the 0–10 scale. The benchmark used more inputs and compared all three methods on the same 265 test days from 16 participants.</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
